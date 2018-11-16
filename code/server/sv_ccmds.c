@@ -1570,7 +1570,7 @@ PB_Rename_f
 ========================================================
 */
 static void PB_Rename_f(void)
-{   
+{
 
 
     client_t *cl;
@@ -1581,26 +1581,133 @@ static void PB_Rename_f(void)
         Com_Printf("Server is not running.\n");
         return;
     }
-	
+
     if (Cmd_Argc() < 3 || strlen(Cmd_Argv(2)) == 0)
     {
         Com_Printf("USAGE: rename <player number> <new name>\n");
         return;
     }
 
-	cl = SV_GetPlayerByHandle();
-	
-	if (!cl) {
+    cl = SV_GetPlayerByHandle();
+
+    if (!cl) {
         return;
-	}
+    }
 
     newname = Cmd_Argv(2);
 
     Info_SetValueForKey(cl->userinfo, "name", newname);
     SV_UserinfoChanged(cl);
     VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
-    
+
     return;
+}
+/*
+========================================================
+PB_BalanceTeams_f
+========================================================
+*/
+static void PB_BalanceTeams_f(void) {
+
+        if ((sv_gametype->integer == 0)||(sv_gametype->integer == 1)||(sv_gametype->integer == 9)||(sv_gametype->integer == 11)){
+            Com_Printf("No need to balance the teams in this Gametype\n");
+            return;
+        }
+
+        int i;
+        int nr = 0;
+        int nb = 0;
+        int ns = 0;
+        int compteur = 0;
+        char cmd[64];
+        int ntotal = 0;
+
+        client_t *client;
+
+        if (!com_sv_running->integer) {
+            Com_Printf("Server is not running\n");
+            return;
+        }
+
+        for (i=0,client=svs.clients ; i < sv_maxclients->integer ; i++,client++)
+        {
+            if (!client->state)
+                continue;
+
+            ntotal++;
+        }
+
+        char  *teamRedList = Cvar_VariableString( "g_redteamlist" );
+        char  *teamBlueList = Cvar_VariableString( "g_blueteamlist" );
+
+        nr = strlen(teamRedList);
+        nb = strlen(teamBlueList);
+        ns = ntotal - (nr + nb);
+
+        Com_Printf("Teams: RED: %i - BLUE: %i - SPECTATOR: %i\n", nr, nb, ns);
+        SV_SendServerCommand(NULL, "chat \"^2INFO: ^7RED: ^1%i ^7- BLUE: ^4%i ^7- SPECTATOR: ^3%i^7\"", nr, nb, ns);
+
+        compteur = fabs(nr - nb);
+
+        if (compteur > 1){
+
+            Com_sprintf(cmd, sizeof(cmd), "balanceteams\n");
+            Cmd_ExecuteString(cmd);
+
+            Com_Printf("Teams are now balanced\n");
+            SV_SendServerCommand(NULL, "cp \"Teams are now balanced\"");
+        }
+
+        else
+        {
+            Com_Printf("Teams are already balanced\n");
+            SV_SendServerCommand(NULL, "cp \"Teams are already balanced\"");
+        }
+}
+/*
+========================================================
+PB_ForceBots_f
+========================================================
+*/
+static void PB_ForceBots_f(void) {
+
+    int i;
+    client_t *cl;
+    char *newteam;
+
+
+    if (!com_sv_running->integer) {
+        Com_Printf("Server is not running\n");
+        return;
+    }
+
+    if (Cmd_Argc() != 2) {
+        Com_Printf("Usage: forcebots <team>\n");
+        return;
+    }
+
+        newteam = Cmd_Argv(1);
+
+    if (Q_stricmp(newteam, "r") == 0){newteam = "red";}
+    if (Q_stricmp(newteam, "b") == 0){newteam = "blue";}
+    if (Q_stricmp(newteam, "s") == 0){newteam = "spectator";}
+
+    for ( i = 0, cl = svs.clients; i < sv_maxclients->integer; i++, cl++) {
+
+        if (!cl->state) {
+            continue;
+        }
+
+        if (cl->netchan.remoteAddress.type == NA_BOT){
+            char cmd[64];
+            int clid = cl - svs.clients;
+            Com_sprintf(cmd, sizeof(cmd), "forceteam %i %s\n", clid, newteam);
+            Cmd_ExecuteString(cmd);
+        }
+
+    }
+
+
 }
 /*
 ==================================================================================================================================================
@@ -1662,6 +1769,8 @@ PB
 =================================================================================
 */
     Cmd_AddCommand ("rename", PB_Rename_f);
+    Cmd_AddCommand ("forcebots", PB_ForceBots_f);
+    Cmd_AddCommand ("teams", PB_BalanceTeams_f);
 /*
 =================================================================================
 */
