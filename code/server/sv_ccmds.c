@@ -1559,7 +1559,52 @@ static void SV_StopServerDemo_f(void)
     }
 
 }
+/*
+==================================================================================================================================================
+PB
+==================================================================================================================================================
+*/
+/*
+========================================================
+PB_Rename_f
+========================================================
+*/
+static void PB_Rename_f(void)
+{   
 
+
+    client_t *cl;
+    char *newname;
+
+    if (!com_sv_running->integer)
+    {
+        Com_Printf("Server is not running.\n");
+        return;
+    }
+	
+    if (Cmd_Argc() < 3 || strlen(Cmd_Argv(2)) == 0)
+    {
+        Com_Printf("USAGE: rename <player number> <new name>\n");
+        return;
+    }
+
+	cl = SV_GetPlayerByHandle();
+	
+	if (!cl) {
+        return;
+	}
+
+    newname = Cmd_Argv(2);
+
+    Info_SetValueForKey(cl->userinfo, "name", newname);
+    SV_UserinfoChanged(cl);
+    VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+    
+    return;
+}
+/*
+==================================================================================================================================================
+*/
 /*
 ==================
 SV_CompleteMapName
@@ -1611,6 +1656,15 @@ void SV_AddOperatorCommands( void ) {
         Cmd_AddCommand("startserverdemo", SV_StartServerDemo_f);
         Cmd_AddCommand("stopserverdemo", SV_StopServerDemo_f);
     }
+/*
+=================================================================================
+PB
+=================================================================================
+*/
+    Cmd_AddCommand ("rename", PB_Rename_f);
+/*
+=================================================================================
+*/
 }
 
 /*
