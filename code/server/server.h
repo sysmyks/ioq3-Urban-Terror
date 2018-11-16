@@ -310,7 +310,17 @@ extern  cvar_t  *sv_demofolder;
 extern	cvar_t	*sv_authServerIP;
 extern  cvar_t  *sv_auth_engine;
 #endif
-
+/*
+===================================================================
+PB
+===================================================================
+*/
+extern cvar_t *pb_filepub;
+extern cvar_t *pb_timepub;
+extern cvar_t *pb_positionpub;
+/*
+===================================================================
+*/
 //===========================================================
 
 //
@@ -327,9 +337,6 @@ void SV_RemoveOperatorCommands (void);
 void SV_MasterHeartbeat (void);
 void SV_MasterShutdown (void);
 
-
-
-
 //
 // sv_init.c
 //
@@ -342,8 +349,6 @@ void SV_GetUserinfo( int index, char *buffer, int bufferSize );
 
 void SV_ChangeMaxClients( void );
 void SV_SpawnServer( char *server, qboolean killBots );
-
-
 
 //
 // sv_client.c
@@ -374,7 +379,15 @@ void SV_WriteDownloadToClient( client_t *cl , msg_t *msg );
 //
 void SV_Heartbeat_f( void );
 void SVD_WriteDemoFile(const client_t*, const msg_t*);
-
+/*
+===================================================================
+PB
+===================================================================
+*/
+char *SV_GetMapSoundingLike(const char *s);
+/*
+===================================================================
+*/
 //
 // sv_snapshot.c
 //
@@ -415,7 +428,17 @@ int			SV_BotGetConsoleMessage( int client, char *buf, int size );
 
 int BotImport_DebugPolygonCreate(int color, int numPoints, vec3_t *points);
 void BotImport_DebugPolygonDelete(int id);
-
+/*
+===================================================================
+PB
+===================================================================
+*/
+//
+// pb_fonctionq.c
+void PB_GameControl( void );
+/*
+===================================================================
+*/
 //============================================================
 //
 // high level object sorting to reduce interaction tests

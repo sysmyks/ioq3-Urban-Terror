@@ -27,7 +27,7 @@ ifeq ($(COMPILE_PLATFORM),mingw32)
   endif
 endif
 
-BUILD_CLIENT     =1
+BUILD_CLIENT     =0
 BUILD_CLIENT_SMP =0
 BUILD_SERVER     =1
 BUILD_GAME_SO    =0
@@ -300,7 +300,7 @@ ifeq ($(PLATFORM),linux)
       CLIENT_LDFLAGS += -lopenal
     endif
   endif
- 
+
   ifeq ($(USE_CURL),1)
     ifneq ($(USE_CURL_DLOPEN),1)
       CLIENT_LDFLAGS += -lcurl
@@ -476,7 +476,7 @@ endif
   endif
 
   OPTIMIZE = -O2 -finline-functions -fweb -funit-at-a-time -funroll-loops -fpeel-loops -ffast-math
-  
+
   ifeq ($(USE_SSE),1)
     OPTIMIZE += -msse -msse2 -mfpmath=sse
   endif
@@ -916,7 +916,7 @@ ifeq ($(USE_SVN),1)
   BASE_CFLAGS += -DSVN_VERSION=\\\"$(SVN_VERSION)\\\"
 endif
 
-define DO_CC       
+define DO_CC
 $(echo_cmd) "CC $<"
 $(Q)$(CC) $(NOTSHLIBCFLAGS) $(CFLAGS) -o $@ -c $<
 endef
@@ -1330,6 +1330,7 @@ Q3DOBJ = \
   $(B)/ded/sv_net_chan.o \
   $(B)/ded/sv_snapshot.o \
   $(B)/ded/sv_world.o \
+  $(B)/ded/pb_fonctions.o \
   \
   $(B)/ded/cm_load.o \
   $(B)/ded/cm_patch.o \
@@ -1390,7 +1391,7 @@ ifeq ($(PLATFORM),mingw32)
   Q3DOBJ += \
     $(B)/ded/win_shared.o \
     $(B)/ded/win_syscon.o \
-    $(B)/ded/win_main.o 
+    $(B)/ded/win_main.o
 else
   Q3DOBJ += \
     $(B)/ded/linux_signals.o \
