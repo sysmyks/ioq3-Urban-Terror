@@ -47,6 +47,20 @@ static char *PB_Replace_str(const char *s, const char *str1, const char *str2) {
     return result;
 }
 //////////////////////////
+//PB_SearchUser
+//////////////////////////
+client_t *PB_SearchUser(int cid) {
+
+client_t *cl;
+int j;
+
+for (j = 0, cl = svs.clients; j < sv_maxclients->integer; j++, cl++) {
+        if (!cl->state) { continue; }
+        if (cid == j) { return cl; break;}
+    }
+    return NULL;
+}
+//////////////////////////
 // PB_TestMapcycle
 //////////////////////////
 static int PB_TestMapcycle(const char *mapcycle){
@@ -283,4 +297,121 @@ void PB_GameControl( void ) {
         }
     }
 
+}
+/*
+===============================================================================================================================================================
+PB Events
+===============================================================================================================================================================
+*/
+/*
+=======================
+PB_CheckDeadorAlive
+=======================
+*/
+static void PB_CheckDeadorAlive( client_t *aclient, client_t *vclient, char *arg ) {
+
+    playerState_t  *ps;
+
+    int            t, min, tens, sec;
+
+    sec = ( sv.time - sv.restartTime ) / 1000;
+    t = ( sv.time - sv.restartTime );
+    min = sec / 60;
+    sec -= min * 60;
+    tens = sec / 10;
+    sec -= tens * 10;
+
+    char *homePath;
+    char *q3ut4Path;
+    char *logpath;
+
+    int aclid = aclient - svs.clients;
+    int vclid = vclient - svs.clients;
+
+    homePath = Cvar_VariableString( "fs_homePath" );
+
+    q3ut4Path = Cvar_VariableString( "fs_game" );
+
+    logpath = FS_BuildOSPath( homePath, q3ut4Path, Cvar_VariableString("g_log"));
+
+    ps = SV_GameClientNum( vclient - svs.clients );
+
+    FILE* fichier = NULL;
+
+    fichier = fopen(logpath, "a");
+
+    if (fichier != NULL)
+    {
+        if (strcmp(arg,"spawn") == 0){
+            fprintf(fichier, "%3i:%i%i ClientAlive: %i %f %f %i\n", min, tens, sec, vclid, ps->origin[0], ps->origin[1], t);
+
+        }
+        if (strcmp(arg,"dead") == 0){
+            fprintf(fichier, "%3i:%i%i ClientDead: %i %i %f %f %i\n", min, tens, sec, vclid, aclid, ps->origin[0], ps->origin[1], t);
+
+        }
+        fclose(fichier);
+    }
+
+}
+
+/*
+=======================
+PB_Events
+=======================
+*/
+void PB_Events(char event[1024])
+{
+    if (sv_gametype->integer == 9){ return; }
+
+    Cmd_TokenizeString( event );
+
+    // Event Kill
+    if (Q_stricmp(Cmd_Argv(0), "Kill:") == 0) {
+        if (atoi(Cmd_Argv(1)) == 1022 && atoi(Cmd_Argv(2)) < 100) {
+
+            client_t *vcl = PB_SearchUser(atoi(Cmd_Argv(2)));
+            client_t *acl = vcl;
+            PB_CheckDeadorAlive( acl, vcl, "dead" );
+
+        }
+        if (atoi(Cmd_Argv(1)) < 100 && atoi(Cmd_Argv(2)) < 100) {
+
+            client_t *acl = PB_SearchUser(atoi(Cmd_Argv(1)));
+            client_t *vcl = PB_SearchUser(atoi(Cmd_Argv(2)));
+
+            PB_CheckDeadorAlive( acl, vcl, "dead" );
+        }
+    }
+    // Event ClientSpawn
+    if (Q_stricmp(Cmd_Argv(0), "ClientSpawn:") == 0) {
+
+        if (atoi(Cmd_Argv(1)) < 100) {
+
+            client_t *cl = PB_SearchUser(atoi(Cmd_Argv(1)));
+            PB_CheckDeadorAlive( cl, cl, "spawn" );
+
+        }
+    }
+    //Event ClientBegin
+    if (Q_stricmp(Cmd_Argv(0), "ClientBegin:") == 0) {
+
+        if (atoi(Cmd_Argv(1)) < 100) {
+
+            client_t *cl = PB_SearchUser(atoi(Cmd_Argv(1)));
+            // Bots armband et name color ( pas vraiment utile sauf pour la commande rcon players - résout le probléme [connecting] bot
+            if ( cl->netchan.remoteAddress.type == NA_BOT ) {
+                char *armband = "0,255,255";
+                char *color ="^5";
+                char name[64];
+                strcpy(name, color);
+                strcat (name, cl->name);
+                Info_SetValueForKey(cl->userinfo, "name", name);
+                Info_SetValueForKey(cl->userinfo, "cg_RGB", armband);
+                SV_UserinfoChanged(cl);
+                VM_Call(gvm, GAME_CLIENT_USERINFO_CHANGED, cl - svs.clients);
+
+            }
+        }
+    }
 }
