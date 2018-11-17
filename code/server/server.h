@@ -187,6 +187,15 @@ typedef struct client_s {
 	int				oldServerTime;
 	qboolean			csUpdated[MAX_CONFIGSTRINGS+1];	
 	int             numcmds;    // number of client commands so far (in this time period), for sv_floodprotect
+/*
+===================================================================
+PB
+===================================================================
+*/
+    int lasthitlocation;
+/*
+===================================================================
+*/
 } client_t;
 
 //=============================================================================

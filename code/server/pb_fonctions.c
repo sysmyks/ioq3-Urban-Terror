@@ -13,6 +13,185 @@ Author      : PtitBigorneau
 ===============================================================================
 */
 ///////////////////////////////////////////////////////////
+//PB_SearchColorTeam
+//////////////////////////////////////////////////////////
+char *PB_SearchColorTeam(int n) {
+
+    if (n == 0) {
+        return "^2";
+    }
+    else if (n == 1) {
+        return "^1";
+    }
+    else if (n == 2) {
+        return "^4";
+    }
+    else if (n == 3) {
+        return "^3";
+    }
+    else {return NULL;}
+}
+//////////////////////////
+// PB_SearchWeapon
+//////////////////////////
+char *PB_SearchWeapon(int id) {
+
+    if ( id == 12 ) {
+        return "Knife";
+    }
+    else if ( id == 13 ) {
+        return "Knife Thrown";
+    }
+    else if ( id == 14 ) {
+        return "Beretta 92G";
+    }
+    else if ( id == 15 ) {
+        return ".50 Desert Eagle";
+    }
+    else if ( id == 16 ) {
+        return "Franchi Spas-12";
+    }
+    else if ( id == 17 ) {
+        return "H&K Ump45";
+    }
+    else if ( id == 18 ) {
+        return "H&K Mp5k";
+    }
+    else if ( id == 19 ) {
+        return "ZM LR300 ML";
+    }
+    else if ( id == 20 ) {
+        return "H&K G36";
+    }
+    else if ( id == 21 ) {
+        return "H&K PSG-1";
+    }
+    else if ( id == 22 ) {
+        return "H&K 69";
+    }
+    else if ( id == 23 ) {
+        return "Bled";
+    }
+    else if ( id == 24 ) {
+        return "shot of Boots";
+    }
+    else if ( id == 25 ) {
+        return "HE Grenade";
+    }
+    else if ( id == 28 ) {
+        return "Remington SR8";
+    }
+    else if ( id == 30 ) {
+        return "Kalashnikov AK103";
+    }
+    else if ( id == 31 ) {
+        return "Sploded";
+    }
+    else if ( id == 32 ) {
+        return "Slapped";
+    }
+    else if ( id == 33 ) {
+        return "Smited";
+    }
+    else if ( id == 34 ) {
+        return "Bombed";
+    }
+    else if ( id == 35 ) {
+        return "Nuked";
+    }
+    else if ( id == 36 ) {
+        return "IMI Negev";
+    }
+    else if ( id == 37 ) {
+        return "H&K 69";
+    }
+    else if ( id == 38 ) {
+        return "M4A1";
+    }
+    else if ( id == 39 ) {
+        return "Glock 18";
+    }
+    else if ( id == 40 ) {
+        return "Colt 1911";
+    }
+    else if ( id == 41 ) {
+        return "Ingram MAC-11";
+    }
+    else if ( id == 42 ) {
+        return "FR-F1";
+    }
+    else if ( id == 43 ) {
+        return "Benelli M4 Super 90";
+    }
+    else if ( id == 44 ) {
+        return "FN Hesrstal P90";
+    }
+    else if ( id == 45 ) {
+        return ".44 Magnum Revolver";
+    }
+    else if ( id == 46 ) {
+        return "TOD-50";
+    }
+    else if ( id == 47 ) {
+        return "Flag";
+    }
+    else if ( id == 48 ) {
+        return "Goomba";
+    }
+    else {return "Unknown Weapon";}
+
+}
+//////////////////////////
+// PB_SearchHitLocation
+//////////////////////////
+char *PB_SearchHitLocation(int id) {
+
+    if ( id == 1 ) {
+        return "Head";
+    }
+    else if ( id == 2 ) {
+        return "Helmet";
+    }
+    else if ( id == 3 ) {
+        return "Torso";
+    }
+    else if ( id == 4 ) {
+        return "Vest";
+    }
+    else if ( id == 5 ) {
+        return "Left Arm";
+    }
+    else if ( id == 6 ) {
+        return "Right Arm";
+    }
+    else if ( id == 7 ) {
+        return "Groin";
+    }
+    else if ( id == 8 ) {
+        return "Butt";
+    }
+    else if ( id == 9 ) {
+        return "Left Upper Leg";
+    }
+    else if ( id == 10 ) {
+        return "Right Upper Leg";
+    }
+    else if ( id == 11 ) {
+        return "Left Lower Leg";
+    }
+    else if ( id == 12 ) {
+        return "Right Lower Leg";
+    }
+    else if ( id == 13 ) {
+        return "Left Foot";
+    }
+    else if ( id == 14 ) {
+        return "Right Foot";
+    }
+    else {return "Unknown";}
+
+}
+///////////////////////////////////////////////////////////
 //PB_Replace_str
 //////////////////////////////////////////////////////////
 static char *PB_Replace_str(const char *s, const char *str1, const char *str2) {
@@ -425,7 +604,66 @@ static void PB_CheckDeadorAlive( client_t *aclient, client_t *vclient, char *arg
     }
 
 }
+/*
+=======================
+PB_KillDistance
+=======================
+*/
+static void PB_KillDistance( client_t *aclient, client_t *vclient, int idweapon ) {
 
+    if (aclient - svs.clients == vclient - svs.clients)
+    {
+        return;
+    }
+
+    playerState_t  *aps = SV_GameClientNum( aclient - svs.clients );
+    playerState_t  *vps = SV_GameClientNum( vclient - svs.clients );
+
+    float dx = aps->origin[0] - vps->origin[0];
+    float dy = aps->origin[1] - vps->origin[1];
+    float adx = (float)fabs(dx);
+    float ady = (float)fabs(dy);
+    float dx2dy2 = (adx * adx) + (ady * ady);
+
+    float dist = (float)sqrtf(dx2dy2);
+
+    char *weapon = PB_SearchWeapon(idweapon);
+
+    int ateam = aps->persistant[PERS_TEAM];
+    int vteam = vps->persistant[PERS_TEAM];
+
+    char acname[64];
+    char vcname[64];
+
+    int hitid = vclient->lasthitlocation;
+
+    char *hitlocation = PB_SearchHitLocation(hitid);
+
+    Q_strncpyz(acname, aclient->name, sizeof(acname));
+    Q_CleanStr(acname);
+
+    Q_strncpyz(vcname, vclient->name, sizeof(vcname));
+    Q_CleanStr(vcname);
+
+    if (idweapon != 22 && idweapon != 23 && idweapon != 25 && idweapon != 37) {
+
+        if (( sv_gametype->integer > 2 && sv_gametype->integer < 9 ) || sv_gametype->integer == 11 ) {
+
+            if (ateam == vteam ) {
+                SV_SendServerCommand(NULL, "print\"%s%s ^7killed %s%s^7 at ^3%.2f m ^7[%s][%s]\"\n", PB_SearchColorTeam(ateam), acname, PB_SearchColorTeam(vteam), vcname, ((dist/100)+((dist/100*0.625))), hitlocation, weapon );
+                return;
+            }
+        }
+
+        SV_SendServerCommand(NULL, "print\"%s%s ^7killed %s%s^7 at ^3%.2f m ^7[%s][%s]\"\n", PB_SearchColorTeam(ateam), acname, PB_SearchColorTeam(vteam), vcname, ((dist/100)+((dist/100*0.625))), hitlocation, weapon );
+
+    }
+    else {
+
+        SV_SendServerCommand(NULL, "print\"%s%s ^7killed %s%s^7 at ^3%.2f m ^7[%s]\"\n", PB_SearchColorTeam(ateam), acname, PB_SearchColorTeam(vteam), vcname, ((dist/100)+((dist/100*0.625))), weapon );
+    }
+
+}
 /*
 =======================
 PB_Events
@@ -452,6 +690,11 @@ void PB_Events(char event[1024])
             client_t *vcl = PB_SearchUser(atoi(Cmd_Argv(2)));
 
             PB_CheckDeadorAlive( acl, vcl, "dead" );
+
+            if (Cvar_VariableValue("g_loghits") != 0) {
+                PB_KillDistance( acl, vcl, atoi(Cmd_Argv(3)));
+            }
+
         }
     }
     // Event ClientSpawn
@@ -460,7 +703,27 @@ void PB_Events(char event[1024])
         if (atoi(Cmd_Argv(1)) < 100) {
 
             client_t *cl = PB_SearchUser(atoi(Cmd_Argv(1)));
+            playerState_t  *ps = SV_GameClientNum( cl - svs.clients );
+
             PB_CheckDeadorAlive( cl, cl, "spawn" );
+
+            if (Cvar_VariableValue("g_loghits") != 0) {
+                if (ps->persistant[PERS_SPAWN_COUNT] < 2 || ps->persistant[PERS_HITS] == 0) {
+
+                    cl->lasthitlocation = -1;
+
+                }
+            }
+        }
+    }
+    // Event Hit
+    if (Q_stricmp(Cmd_Argv(0), "Hit:") == 0) {
+
+        if (atoi(Cmd_Argv(1)) < 100 && atoi(Cmd_Argv(2)) < 100) {
+            if (Cvar_VariableValue("g_loghits") != 0) {
+                client_t *vcl = PB_SearchUser(atoi(Cmd_Argv(1)));
+                 vcl->lasthitlocation = atoi(Cmd_Argv(3));
+            }
 
         }
     }
@@ -470,7 +733,7 @@ void PB_Events(char event[1024])
         if (atoi(Cmd_Argv(1)) < 100) {
 
             client_t *cl = PB_SearchUser(atoi(Cmd_Argv(1)));
-            // Bots color ( pas vraiment utile sauf pour la commande rcon players - résout le probléme [connecting] bot
+            // Bots armband et name color ( pas vraiment utile sauf pour la commande rcon players - résout le probléme [connecting] bot )
             if ( cl->netchan.remoteAddress.type == NA_BOT ) {
                 char *armband = "0,255,255";
                 char *color ="^5";

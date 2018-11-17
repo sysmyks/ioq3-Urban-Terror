@@ -227,7 +227,7 @@ void QDECL Com_Printf( const char *fmt, ... ) {
 PB
 ====================================================================================================================
 */
-	if(strstr(msg, "Kill:")-msg+1 == 1 || strstr(msg, "ClientSpawn:") -msg+1 == 1 || strstr(msg, "ClientBegin:") -msg+1 == 1) {
+	if(strstr(msg, "Kill:")-msg+1 == 1 || strstr(msg, "ClientSpawn:") -msg+1 == 1 || strstr(msg, "ClientBegin:") -msg+1 == 1 || strstr(msg, "Hit:") -msg+1 == 1) {
         PB_Events(msg);
 	}
 /*
