@@ -80,6 +80,8 @@ cvar_t *pb_knifefullstamina;
 /*
 ===================================================================
 */
+// check for valid guid checkclientguid fenix
+cvar_t  *sv_checkClientGuid;
 /*
 =============================================================================
 

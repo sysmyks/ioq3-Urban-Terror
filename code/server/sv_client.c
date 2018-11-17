@@ -165,7 +165,36 @@ void SV_AuthorizeIpPacket( netadr_t from ) {
 	// clear the challenge record so it won't timeout and let them through
 	Com_Memset( &svs.challenges[i], 0, sizeof( svs.challenges[i] ) );
 }
+// check for valid guid checkclientguid fenix
+/////////////////////////////////////////////////////////////////////
+// Name        : SV_ApproveGuid
+// Description : Returns a false value if and only if a client with 
+//               this cl_guid should not be allowed to enter the 
+//               server. The check is only made if sv_checkClientGuid 
+//               is nonzero positive, otherwise every guid passes.
+//               A cl_guid string must have length 32 and consist of 
+//               characters '0' through '9' and 'A' through 'F'.
+/////////////////////////////////////////////////////////////////////
+qboolean SV_ApproveGuid( const char *guid) {
 
+    int    i;
+    int    length;
+    char   c;
+    
+    if (sv_checkClientGuid->integer > 0) {
+        length = strlen(guid); 
+        if (length != 32) { 
+            return qfalse; 
+        }
+        for (i = 31; i >= 0;) {
+            c = guid[i--];
+            if (!(('0' <= c && c <= '9') || ('A' <= c && c <= 'F'))) {
+                return qfalse;
+            }
+        }
+    }
+    return qtrue;
+}
 /*
 ==================
 SV_DirectConnect
@@ -277,7 +306,13 @@ void SV_DirectConnect(netadr_t from) {
                     numIpClients++; 
                 }   
             }
-
+            // check for valid guid checkclientguid fenix
+            if (!SV_ApproveGuid(Info_ValueForKey(userinfo, "cl_guid"))) {
+                NET_OutOfBandPrint(NS_SERVER, from, "print\nInvalid GUID detected: get legit bro!\n");
+                Com_DPrintf("Invalid cl_guid: rejected connection from %s\n", NET_AdrToString(from));
+                return;
+            }
+			
             if (sv_clientsPerIp->integer && numIpClients >= sv_clientsPerIp->integer) {
                 NET_OutOfBandPrint(NS_SERVER, from, "print\nToo many connections from the same IP\n");
                 Com_DPrintf ("Client %i rejected due to too many connections from the same IP\n", i);
@@ -382,7 +417,7 @@ void SV_DirectConnect(netadr_t from) {
     cl->reliableAcknowledge = 0;
     cl->reliableSequence = 0;
 
-gotnewcl:
+    gotnewcl:
     // build a new connection
     // accept the new client
     // this is the only place a client_t is ever initialized

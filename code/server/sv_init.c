@@ -951,6 +951,9 @@ PB
 /*
 ===================================================================
 */
+    // check for valid guid checkclientguid fenix
+    sv_checkClientGuid = Cvar_Get("sv_checkClientGuid", "1", CVAR_ARCHIVE);
+
     // initialize bot cvars so they are listed and can be set before loading the botlib
     SV_BotInitCvars();
 

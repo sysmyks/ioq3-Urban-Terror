@@ -340,6 +340,8 @@ extern cvar_t *pb_knifefullstamina;
 /*
 ===================================================================
 */
+// check for valid guid checkclientguid fenix
+extern  cvar_t  *sv_checkClientGuid;
 //===========================================================
 
 //
