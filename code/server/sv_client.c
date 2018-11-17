@@ -490,6 +490,7 @@ PB
 ===================================================================
 */
 	newcl->lasthitlocation = -1;
+	newcl->tod50 = qfalse;
 /*
 ===================================================================
 */
@@ -1477,6 +1478,7 @@ PB hidden say
 			Cmd_Args_Sanitize();
 
 			argsFromOneMaxlen = -1;
+
 			if (Q_stricmp("say", Cmd_Argv(0)) == 0 || Q_stricmp("say_team", Cmd_Argv(0)) == 0) {
 				argsFromOneMaxlen = MAX_SAY_STRLEN;
 			}

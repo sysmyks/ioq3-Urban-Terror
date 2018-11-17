@@ -1707,7 +1707,53 @@ static void PB_ForceBots_f(void) {
 
     }
 
+}
+/*
+========================================================
+PB_GiveTod50_f
+========================================================
+*/
+static void PB_GiveTod50_f(void)
+{
 
+    client_t *cl;
+    char cname[64];
+
+
+    if (!com_sv_running->integer) {
+        Com_Printf("Server is not running.\n");
+        return;
+    }
+    if (Cvar_VariableValue("g_instagib") != 0) {
+        Com_Printf("give a tod50 is not possible. InstaGib mode is enabled.\n");
+        return;
+    }
+
+    if (Cmd_Argc() < 2) {
+        Com_Printf("USAGE: givetod50 <player> or givetod50 <player> <off>\n");
+        return;
+    }
+
+    cl = SV_GetPlayerByHandle();
+
+    if (cl) {
+        Q_strncpyz(cname, cl->name, sizeof(cname));
+        Q_CleanStr(cname);
+        if (Cmd_Argv(2) && Q_stricmp(Cmd_Argv(2), "off") == 0) {
+            if (cl->tod50) {
+                cl->tod50 = qfalse;
+                playerState_t  *ps = SV_GameClientNum( cl - svs.clients );
+                ps->weapon = 0;
+                SV_SendServerCommand(cl, "cp \"TOD50 : we give and we take back !\"\n");
+                Com_Printf("%s: TOD 50 off.\n", cname);
+            }
+        }
+        else {
+            PB_GiveTod50(cl);
+        }
+    }
+
+    return;
 }
 /*
 ==================================================================================================================================================
@@ -1771,6 +1817,7 @@ PB
     Cmd_AddCommand ("rename", PB_Rename_f);
     Cmd_AddCommand ("forcebots", PB_ForceBots_f);
     Cmd_AddCommand ("teams", PB_BalanceTeams_f);
+    Cmd_AddCommand ("givetod50", PB_GiveTod50_f);
 /*
 =================================================================================
 */

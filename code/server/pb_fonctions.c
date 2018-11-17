@@ -12,6 +12,43 @@ Author      : PtitBigorneau
 /*
 ===============================================================================
 */
+/*
+========================================================
+PB Weapons List
+========================================================
+*/
+static int Lweapons[28][5] = {
+{ 0, 0, 0, 0, 0 },
+{ 12, 1281, 0, 5, 0 }, // 1 ut_weapon_knife
+{ 14, 3842, 2, 15, 3 }, // 2 ut_weapon_beretta
+{ 15, 1795, 2, 7, 3 }, // 3 ut_weapon_deagle
+{ 16, 2052, 24, 8, 2 }, // 4 ut_weapon_spas12
+{ 18, 73221, 2, 30, 2 }, // 5 ut_weapon_mp5k
+{ 17, 73222, 2, 30, 2 }, // 6 ut_weapon_ump45
+{ 22, 263, 3, 1, 1 }, // 7 ut_weapon_hk69
+{ 19, 138760, 2, 30, 1 }, // 8 ut_weapon_lr
+{ 20, 138761, 2, 30, 1 }, // 9 ut_weapon_g36
+{ 21, 2058, 3, 8, 1 }, // 10 ut_weapon_psg1
+{ 25, 523, 0, 2, 0 }, // 11 ut_weapon_grenade_he
+{ 26, 524, 0, 2, 0 }, // 12 ut_weapon_flash
+{ 27, 525, 0, 2, 0 }, // 13 ut_weapon_smoke
+{ 28, 1294, 3, 5, 1 }, // 14 ut_weapon_sr8
+{ 30, 138767, 2, 30, 1 }, // 15 ut_weapon_ak103
+{ 34, 272, 0, 1, 0 }, // 16 ut_weapon_bomb
+{ 36, 23057, 1, 90, 1 }, // 17 ut_weapon_negev
+{ 0, 0, 0, 0, 0 }, //  null
+{ 38, 138771, 2, 30, 1 }, // 19 ut_weapon_m4
+{ 39, 68628, 2, 12, 3 }, // 20 ut_weapon_glock
+{ 40, 2581, 2, 10, 3 }, // 21 ut_weapon_magnum
+{ 41, 8214, 2, 30, 2 }, // 22 ut_weapon_mac11
+{ 42, 1559, 3, 6, 1 }, // 23 ut_weapon_frf1
+{ 43, 1304, 15, 5, 2 }, // 24 ut_weapon_benelli
+{ 44, 12825, 2, 50, 2 }, // 25 ut_weapon_p90
+{ 45, 1562, 3, 6, 3 }, // 26 ut_weapon_colt1911
+{ 46, 283, 1, 1, 0 }  // 27 ut_weapon_tod50
+};
+extern int Lweapons[28][5];
+
 ///////////////////////////////////////////////////////////
 //PB_SearchColorTeam
 //////////////////////////////////////////////////////////
@@ -400,9 +437,90 @@ int PB_SearchIDWeapon(int powerups, int option) {
 }
 /*
 ===============================================================================================================================================================
+PB_GiveTod50
+===============================================================================================================================================================
+*/
+void PB_GiveTod50( client_t *cl ) {
+
+    playerState_t  *ps = SV_GameClientNum( cl - svs.clients );
+    int i;
+    int idweap;
+    char cname[64];
+    qboolean change = qfalse;
+    qboolean tod50status = cl->tod50;
+
+    Q_strncpyz(cname, cl->name, sizeof(cname));
+    Q_CleanStr(cname); 
+
+    for (i = 0; i < MAX_POWERUPS; i++) {
+        idweap = PB_SearchIDWeapon(ps->powerups[i], 1);
+        if (Lweapons[idweap][4] == 1) { 
+            ps->powerups[i] = 283;
+            ps->weapon = i;                    
+            change = qtrue;    
+            break;
+        }
+
+    }
+    if (!change) {
+        for (i = 0; i < MAX_POWERUPS; i++) {
+            idweap = PB_SearchIDWeapon(ps->powerups[i], 1);
+            if (Lweapons[idweap][4] == 2) { 
+                ps->powerups[i] = 283;
+                ps->weapon = i;                        
+                change = qtrue;    
+                break;
+        }
+
+        }
+    }
+    if (!change) {
+        for (i = 0; i < MAX_POWERUPS; i++) {
+            idweap = PB_SearchIDWeapon(ps->powerups[i], 1);
+            if (idweap == 0) { 
+                ps->powerups[i] = 283;
+                ps->weapon = i;                    
+                change = qtrue;    
+                break;
+            }
+
+        }
+    }
+    if (!change) {
+        Com_Printf("Impossible to give a TOD 50 to %s\n", cname);
+    }
+    else {
+        cl->tod50 = qtrue;
+        if (!tod50status) {
+            Com_Printf("%s: TOD50 on.\n", cname);
+            SV_SendServerCommand(cl, "cp \"TOD50 : Merry Christmas !\"\n");
+        }
+    }
+
+}
+/*
+===============================================================================================================================================================
 PB_ControlWeapons
 ===============================================================================================================================================================
 */
+/*
+=======================
+PB_ControlTod50
+=======================
+*/
+void PB_ControlTod50( client_t *cl ) {
+    
+    int i;
+    int idweap;
+    playerState_t  *ps = SV_GameClientNum( cl - svs.clients );
+    
+    for (i = 0; i < MAX_POWERUPS; i++) {
+        idweap = PB_SearchIDWeapon(ps->powerups[i], 1);
+        if (idweap == 27 && !cl->tod50) { 
+            ps->powerups[i] = 0;
+        }
+    }
+}
 /*
 =======================
 PB_ControlStamina
@@ -425,6 +543,9 @@ void PB_ControlWeapons( client_t *cl ) {
 
     if (pb_knifefullstamina->integer == 1) {
         PB_ControlStamina( cl );
+    }
+    if (Cvar_VariableValue("g_instagib") == 0) { 
+        PB_ControlTod50( cl );
     }
  }
 /*
@@ -707,13 +828,23 @@ void PB_Events(char event[1024])
 
             PB_CheckDeadorAlive( cl, cl, "spawn" );
 
-            if (Cvar_VariableValue("g_loghits") != 0) {
-                if (ps->persistant[PERS_SPAWN_COUNT] < 2 || ps->persistant[PERS_HITS] == 0) {
-
+            if (ps->persistant[PERS_SPAWN_COUNT] < 2 || ps->persistant[PERS_HITS] == 0) {
+                if (Cvar_VariableValue("g_loghits") != 0) {
                     cl->lasthitlocation = -1;
 
                 }
             }
+            if (Cvar_VariableValue("g_instagib") == 0) {
+                if (ps->persistant[PERS_SPAWN_COUNT] < 2) {    
+                    cl->tod50 = qfalse;             
+                }
+                else {
+                    if (cl->tod50) {
+                        PB_GiveTod50(cl);
+                    }                        
+                }
+            }
+
         }
     }
     // Event Hit
