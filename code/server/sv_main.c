@@ -76,6 +76,7 @@ PB
 cvar_t *pb_filepub;
 cvar_t *pb_timepub;
 cvar_t *pb_positionpub;
+cvar_t *pb_knifefullstamina;
 /*
 ===================================================================
 */

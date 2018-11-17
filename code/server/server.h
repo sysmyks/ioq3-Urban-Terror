@@ -32,7 +32,16 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 										// GAME BOTH REFERENCE !!!
 
 #define	MAX_ENT_CLUSTERS	16
-
+/*
+=================================================================================
+PB
+=================================================================================
+*/
+#define    STAT_STAMINA        0
+#define    STAT_HEALTH         6
+/*
+=================================================================================
+*/
 typedef struct svEntity_s {
 	struct worldSector_s *worldSector;
 	struct svEntity_s *nextEntityInWorldSector;
@@ -318,6 +327,7 @@ PB
 extern cvar_t *pb_filepub;
 extern cvar_t *pb_timepub;
 extern cvar_t *pb_positionpub;
+extern cvar_t *pb_knifefullstamina;
 /*
 ===================================================================
 */
@@ -385,7 +395,6 @@ PB
 ===================================================================
 */
 char *SV_GetMapSoundingLike(const char *s);
-void PB_Events(char event[1024]);
 /*
 ===================================================================
 */
@@ -437,6 +446,8 @@ PB
 //
 // pb_fonctionq.c
 void PB_GameControl( void );
+void PB_Events(char event[1024]);
+void PB_ControlWeapons( client_t *cl );
 /*
 ===================================================================
 */

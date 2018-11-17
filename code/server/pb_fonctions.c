@@ -177,6 +177,77 @@ static char *PB_Searchnextmap(void){
         }
     return NULL;
 }
+///////////////////////////////////////////////////////////
+//PB_SearchIDWeapon
+//////////////////////////////////////////////////////////
+int PB_SearchIDWeapon(int powerups, int option) {
+
+    int chargeurs = 0;
+    int ammo = 0;
+    int idweap = 0;
+
+    if (powerups > 16777216) {
+        chargeurs = powerups/16777216;
+        ammo = (powerups -(chargeurs*16777216))/256;
+        if (ammo >= 256) {
+            powerups = powerups - 65536;
+            chargeurs = powerups/16777216;
+            ammo = (powerups -(chargeurs*16777216))/256;
+               if (ammo >= 256) {
+                powerups = powerups - 65536;
+                chargeurs = powerups/16777216;
+                ammo = (powerups -(chargeurs*16777216))/256;
+            }
+        }
+
+        idweap = powerups - ((chargeurs*16777216)+(ammo*256));
+    }
+    else {
+        ammo = powerups/256;
+        if (ammo >= 256) {
+            powerups = powerups - 65536;
+            ammo = powerups/256;
+        }
+        idweap = powerups - (ammo*256);
+        chargeurs = 0;
+    }
+
+    if (option == 1) { return idweap; }
+    if (option == 2) { return chargeurs; }
+    if (option == 3) { return ammo; }
+
+    return 0;
+
+}
+/*
+===============================================================================================================================================================
+PB_ControlWeapons
+===============================================================================================================================================================
+*/
+/*
+=======================
+PB_ControlStamina
+=======================
+*/
+void PB_ControlStamina( client_t *cl ) {
+
+    playerState_t  *ps = SV_GameClientNum( cl - svs.clients );
+    int weap = PB_SearchIDWeapon(ps->powerups[ps->weapon], 1);
+    if (weap == 11 || weap == 12 || weap == 16 || weap < 2 ) {ps->stats[STAT_STAMINA] = ps->stats[STAT_HEALTH] * 300;}
+
+}
+
+/*
+=======================
+PB_ControlWeapons
+=======================
+*/
+void PB_ControlWeapons( client_t *cl ) {
+
+    if (pb_knifefullstamina->integer == 1) {
+        PB_ControlStamina( cl );
+    }
+ }
 /*
 ===============================================================================================================================================================
 PB GameControl
@@ -399,7 +470,7 @@ void PB_Events(char event[1024])
         if (atoi(Cmd_Argv(1)) < 100) {
 
             client_t *cl = PB_SearchUser(atoi(Cmd_Argv(1)));
-            // Bots armband et name color ( pas vraiment utile sauf pour la commande rcon players - résout le probléme [connecting] bot
+            // Bots color ( pas vraiment utile sauf pour la commande rcon players - résout le probléme [connecting] bot
             if ( cl->netchan.remoteAddress.type == NA_BOT ) {
                 char *armband = "0,255,255";
                 char *color ="^5";
