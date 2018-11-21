@@ -948,6 +948,7 @@ PB
     pb_timepub = Cvar_Get ("pb_timepub", "0", CVAR_ARCHIVE );
     pb_positionpub = Cvar_Get ("pb_positionpub", "print", CVAR_ARCHIVE );
     pb_knifefullstamina = Cvar_Get ("pb_knifefullstamina", "0", CVAR_ARCHIVE );
+    pb_snipeteam = Cvar_Get ("pb_snipeteam", "0", CVAR_ARCHIVE );
 /*
 ===================================================================
 */

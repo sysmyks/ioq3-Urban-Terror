@@ -59,29 +59,30 @@ cvar_t    *sv_strictAuth;
 cvar_t    *sv_clientsPerIp;
 
 cvar_t    *sv_demonotice;                // notice to print to a client being recorded server-side
-cvar_t  *sv_tellprefix;
-cvar_t  *sv_sayprefix;
-cvar_t     *sv_demofolder;                //@Barbatos - the name of the folder that contains server-side demos
+cvar_t    *sv_tellprefix;
+cvar_t    *sv_sayprefix;
+cvar_t    *sv_demofolder;                //@Barbatos - the name of the folder that contains server-side demos
 
 //@Barbatos
 #ifdef USE_AUTH
 cvar_t    *sv_authServerIP;
-cvar_t  *sv_auth_engine;
+cvar_t    *sv_auth_engine;
 #endif
 /*
 ===================================================================
 PB
 ===================================================================
 */
-cvar_t *pb_filepub;
-cvar_t *pb_timepub;
-cvar_t *pb_positionpub;
-cvar_t *pb_knifefullstamina;
+cvar_t   *pb_filepub;
+cvar_t   *pb_timepub;
+cvar_t   *pb_positionpub;
+cvar_t   *pb_knifefullstamina;
+cvar_t   *pb_snipeteam;
 /*
 ===================================================================
 */
 // check for valid guid checkclientguid fenix
-cvar_t  *sv_checkClientGuid;
+cvar_t   *sv_checkClientGuid;
 /*
 =============================================================================
 

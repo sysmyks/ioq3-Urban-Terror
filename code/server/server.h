@@ -338,6 +338,7 @@ extern cvar_t *pb_filepub;
 extern cvar_t *pb_timepub;
 extern cvar_t *pb_positionpub;
 extern cvar_t *pb_knifefullstamina;
+extern cvar_t *pb_snipeteam;
 /*
 ===================================================================
 */

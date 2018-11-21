@@ -505,6 +505,31 @@ PB_ControlWeapons
 */
 /*
 =======================
+PB_ControlSnipeOnly
+=======================
+*/
+void PB_ControlSnipeOnly( client_t *cl ) {
+    
+    int i;
+    int idweap;
+    playerState_t  *ps = SV_GameClientNum( cl - svs.clients );
+    int team = ps->persistant[PERS_TEAM];
+
+    if (pb_snipeteam->integer == team || pb_snipeteam->integer == 3) {
+
+        for (i = 0; i < MAX_POWERUPS; i++) {
+            idweap = PB_SearchIDWeapon(ps->powerups[i], 1);
+            if (Lweapons[idweap][4] == 1 || Lweapons[idweap][4] == 2) {
+                if (idweap != 10 && idweap != 14 && idweap != 23 && idweap != 27) {
+                    ps->powerups[i] = 0;
+                }
+            }
+        }
+
+    }
+}
+/*
+=======================
 PB_ControlTod50
 =======================
 */
@@ -546,6 +571,9 @@ void PB_ControlWeapons( client_t *cl ) {
     }
     if (Cvar_VariableValue("g_instagib") == 0) { 
         PB_ControlTod50( cl );
+    }
+    if (pb_snipeteam->integer > 0 && pb_snipeteam->integer < 4) {
+        PB_ControlSnipeOnly( cl );
     }
  }
 /*
@@ -676,6 +704,62 @@ PB Events
 */
 /*
 =======================
+PB_SnipeOnly
+=======================
+*/
+static void PB_SpawnSnipeOnly( client_t *client ) {
+    
+    playerState_t  *ps = SV_GameClientNum( client - svs.clients );
+    int i;
+    int idweap;
+
+    qboolean change = qfalse;
+
+    for (i = 0; i < MAX_POWERUPS; i++) {
+        idweap = PB_SearchIDWeapon(ps->powerups[i], 1);
+        if (idweap == 10 || idweap == 14 || idweap == 23 || idweap == 27) {
+            change = qtrue;    
+            break;
+        }
+
+    }
+    if (!change) {
+        for (i = 0; i < MAX_POWERUPS; i++) {
+            idweap = PB_SearchIDWeapon(ps->powerups[i], 1);
+            if (Lweapons[idweap][4] == 1) { 
+                ps->powerups[i] = 100664590;
+                change = qtrue;    
+                break;
+        }
+
+        }
+    }
+    if (!change) {
+        for (i = 0; i < MAX_POWERUPS; i++) {
+            idweap = PB_SearchIDWeapon(ps->powerups[i], 1);
+            if (Lweapons[idweap][4] == 2) { 
+                ps->powerups[i] = 100664590;
+                change = qtrue;    
+                break;
+        }
+
+        }
+    }
+    if (!change) {
+        for (i = 0; i < MAX_POWERUPS; i++) {
+            idweap = PB_SearchIDWeapon(ps->powerups[i], 1);
+            if (idweap == 0) { 
+                ps->powerups[i] = 100664590;
+                change = qtrue;    
+                break;
+            }
+
+        }
+    }
+
+}
+/*
+=======================
 PB_CheckDeadorAlive
 =======================
 */
@@ -683,7 +767,7 @@ static void PB_CheckDeadorAlive( client_t *aclient, client_t *vclient, char *arg
 
     playerState_t  *ps;
 
-    int            t, min, tens, sec;
+    int t, min, tens, sec;
 
     sec = ( sv.time - sv.restartTime ) / 1000;
     t = ( sv.time - sv.restartTime );
@@ -844,7 +928,15 @@ void PB_Events(char event[1024])
                     }                        
                 }
             }
-
+            if (pb_snipeteam->integer == 1 || pb_snipeteam->integer == 2) {
+                int team = ps->persistant[PERS_TEAM];
+                if (pb_snipeteam->integer == team) {
+                    PB_SpawnSnipeOnly(cl);
+                }
+            }
+            if (pb_snipeteam->integer == 3) {
+                PB_SpawnSnipeOnly(cl);
+            }
         }
     }
     // Event Hit
