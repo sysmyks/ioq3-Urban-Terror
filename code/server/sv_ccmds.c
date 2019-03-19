@@ -1756,6 +1756,60 @@ static void PB_GiveTod50_f(void)
     return;
 }
 /*
+========================================================
+PB_KickBots_f
+========================================================
+*/
+static void PB_KickBots_f(void) {
+    
+    char cmd[64];
+	
+    if (!Q_stricmp(pb_enablebots->string, "off")){
+        Com_Printf("Bots are already disabled.\n"); 
+	    return;
+	}
+    Com_sprintf(cmd, sizeof(cmd), "pb_enablebots off\n");
+    Cmd_ExecuteString(cmd);
+}
+/*
+========================================================
+PB_AddBots_f
+========================================================
+*/
+static void PB_AddBots_f(void) {
+    
+    char cmd[64];
+		
+    if (!Q_stricmp(pb_enablebots->string, "on")){
+        Com_Printf("Bots order is already launched.\n"); 
+	    return;
+	}
+    if (sv_gametype->integer == 0 || sv_gametype->integer == 1 || sv_gametype->integer == 9 || sv_gametype->integer == 10 || sv_gametype->integer == 11) {
+        Com_Printf("Command is not avaible on this gametype.\n"); 
+        return;
+	}
+
+    Com_sprintf(cmd, sizeof(cmd), "pb_enablebots on\n");
+    Cmd_ExecuteString(cmd);
+	
+	char cmdb[64];
+    if (!Q_stricmp(Cvar_VariableString( "g_mapcycle" ), pb_mapcycle->string)) {
+
+        Com_sprintf(cmdb, sizeof(cmdb), "g_mapcycle %s\n", pb_mapcyclebots->string);
+        Cmd_ExecuteString(cmdb); 	
+		
+		int testmap2 = 0;
+      	testmap2 = PB_TestMapBots(Cvar_VariableString( "mapname" ));
+		
+		if (testmap2 == 0){
+            Com_Printf("This map does not support bots.\n"); 
+            Com_Printf("Bots will be added to the next map.\n"); 
+		}
+	
+    }
+        
+}
+/*
 ==================================================================================================================================================
 */
 /*
@@ -1818,6 +1872,9 @@ PB
     Cmd_AddCommand ("forcebots", PB_ForceBots_f);
     Cmd_AddCommand ("teams", PB_BalanceTeams_f);
     Cmd_AddCommand ("givetod50", PB_GiveTod50_f);
+
+    Cmd_AddCommand ("kickbots", PB_KickBots_f);
+    Cmd_AddCommand ("addbots", PB_AddBots_f);
 /*
 =================================================================================
 */

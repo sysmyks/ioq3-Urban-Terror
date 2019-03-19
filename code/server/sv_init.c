@@ -949,6 +949,14 @@ PB
     pb_positionpub = Cvar_Get ("pb_positionpub", "print", CVAR_ARCHIVE );
     pb_knifefullstamina = Cvar_Get ("pb_knifefullstamina", "0", CVAR_ARCHIVE );
     pb_snipeteam = Cvar_Get ("pb_snipeteam", "0", CVAR_ARCHIVE );
+	
+    pb_mapslistbots = Cvar_Get ("pb_mapslistbots", "", CVAR_ARCHIVE );
+    pb_mapcyclebots = Cvar_Get ("pb_mapcyclebots", "", CVAR_ARCHIVE );
+    pb_mapcycle = Cvar_Get ("pb_mapcycle", "", CVAR_ARCHIVE );
+    pb_botsmapdefault = Cvar_Get ("pb_botsmapdefault", "ut4_turnpike", CVAR_ARCHIVE );
+    pb_enablebots = Cvar_Get ("pb_enablebots", "off", CVAR_ARCHIVE );
+    pb_botminplayers = Cvar_Get ("pb_botminplayers", "0", CVAR_ARCHIVE );
+    pb_autobots = Cvar_Get ("pb_autobots", "off", CVAR_ARCHIVE );
 /*
 ===================================================================
 */

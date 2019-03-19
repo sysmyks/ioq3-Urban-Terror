@@ -4,7 +4,7 @@ PB Fonctions
 Author      : PtitBigorneau
 ===============================================================================================================================================================
 */
-
+    
 #include "server.h"
 #include <unistd.h>
 #include <stdlib.h>
@@ -394,7 +394,7 @@ static char *PB_Searchnextmap(void){
     return NULL;
 }
 ///////////////////////////////////////////////////////////
-//PB_SearchIDWeapon
+// PB_SearchIDWeapon
 //////////////////////////////////////////////////////////
 int PB_SearchIDWeapon(int powerups, int option) {
 
@@ -409,7 +409,7 @@ int PB_SearchIDWeapon(int powerups, int option) {
             powerups = powerups - 65536;
             chargeurs = powerups/16777216;
             ammo = (powerups -(chargeurs*16777216))/256;
-               if (ammo >= 256) {
+            if (ammo >= 256) {
                 powerups = powerups - 65536;
                 chargeurs = powerups/16777216;
                 ammo = (powerups -(chargeurs*16777216))/256;
@@ -433,6 +433,49 @@ int PB_SearchIDWeapon(int powerups, int option) {
     if (option == 3) { return ammo; }
 
     return 0;
+
+}
+///////////////////////////////////////////////////////////
+// PB_TestMapBots
+//////////////////////////////////////////////////////////
+int PB_TestMapBots(char *map)
+{
+
+    FILE* fichier = NULL;
+    char ligne[128];
+    char *test = NULL;
+
+    char *bmhomePath;
+    char *bmq3ut4Path;
+    char *bmpath;
+    
+    bmhomePath = Cvar_VariableString( "fs_homePath" );
+
+    bmq3ut4Path = Cvar_VariableString( "fs_game" );
+
+    bmpath = FS_BuildOSPath( bmhomePath, bmq3ut4Path, pb_mapslistbots->string);
+
+    fichier = fopen(bmpath, "r+");
+
+    if (fichier != NULL)
+    {
+        while (fgets(ligne, sizeof(ligne), fichier) != NULL)
+        {
+            Cmd_TokenizeString( ligne );
+
+            if (Q_stricmp(map, Cmd_Argv(0))==0)
+            {
+                test = "ok"; break;      
+            }
+           
+        }
+        fclose(fichier);
+
+    }
+    else {return 0;}
+
+    if (test == NULL){return 0;}
+    else {return 1;}
 
 }
 /*
@@ -685,6 +728,223 @@ void PB_Pub( void ) {
 }
 /*
 =======================
+PB_CheckMapBots
+=======================
+*/
+void PB_CheckMapBots( void ) {
+    
+    int botminplayers;
+    char cmd[64];
+    char cmd2[64];
+    char cmd3[64];
+    char * mapname;
+    int testmap = 0;
+    
+    char *testfilemapbots = NULL;
+    char *testmapcyclebots = NULL;
+            
+    if (!Q_stricmp(pb_mapslistbots->string, "")) {
+        testfilemapbots = NULL;
+    }
+    else {
+        testfilemapbots = "ok";
+    }
+    if (!Q_stricmp(pb_mapcyclebots->string, "")&&!Q_stricmp(pb_mapcycle->string, "")) {
+        testmapcyclebots = NULL;
+    }
+    else {
+        testmapcyclebots = "ok";
+    }
+    
+    mapname = Cvar_VariableString( "mapname" );
+    
+    botminplayers = Cvar_VariableValue( "bot_minplayers" );
+    
+    if (testfilemapbots != NULL){
+        testmap = PB_TestMapBots(mapname);
+    }
+    else {testmap = 0;}
+
+    if (sv_gametype->integer == 0 || sv_gametype->integer == 1 || sv_gametype->integer == 9 || sv_gametype->integer == 10 || sv_gametype->integer == 11) {
+        
+        if (botminplayers != 0) {       
+            Com_sprintf(cmd, sizeof(cmd), "bot_minplayers 0\n");
+            Cmd_ExecuteString(cmd);
+            Com_sprintf(cmd2, sizeof(cmd2), "kick allbots\n");
+            Cmd_ExecuteString(cmd2); 
+        
+            if (testmapcyclebots != NULL){
+                Com_sprintf(cmd3, sizeof(cmd3), "g_mapcycle %s\n", pb_mapcycle->string);
+                Cmd_ExecuteString(cmd3); 
+            }
+        }
+    }
+
+    else {
+
+        if (!Q_stricmp(pb_enablebots->string, "on")){
+            if (botminplayers == 0) { 
+                if (testmap == 1){
+                    Com_sprintf(cmd, sizeof(cmd), "bot_minplayers %s\n",pb_botminplayers->string);
+                    Cmd_ExecuteString(cmd);
+                    
+                    if (testmapcyclebots != NULL){
+                        Com_sprintf(cmd3, sizeof(cmd3), "g_mapcycle %s\n", pb_mapcyclebots->string);
+                        Cmd_ExecuteString(cmd3); 
+                    }
+                }
+                  
+            }
+            else
+            {
+                if (testmap == 0){
+                    Com_sprintf(cmd, sizeof(cmd), "bot_minplayers 0\n");
+                    Cmd_ExecuteString(cmd);
+                    Com_sprintf(cmd2, sizeof(cmd2), "kick allbots\n");
+                    Cmd_ExecuteString(cmd2);
+                    if (testmapcyclebots != NULL){
+                        Com_sprintf(cmd3, sizeof(cmd3), "g_mapcycle %s\n", pb_mapcycle->string);
+                        Cmd_ExecuteString(cmd3); 
+                    }
+                }
+            }
+        }
+        else {
+            if (botminplayers != 0) {             
+                Com_sprintf(cmd, sizeof(cmd), "bot_minplayers 0\n");
+                Cmd_ExecuteString(cmd);
+                Com_sprintf(cmd2, sizeof(cmd2), "kick allbots\n");
+                Cmd_ExecuteString(cmd2);
+                if (testmapcyclebots != NULL){
+                    Com_sprintf(cmd3, sizeof(cmd3), "g_mapcycle %s\n", pb_mapcycle->string);
+                    Cmd_ExecuteString(cmd3); 
+                }
+            }
+        }
+    }
+
+}
+/*
+=======================
+PB PB_CheckPlayers
+=======================
+*/
+void PB_CheckPlayers( void ) {
+    
+    if (sv_gametype->integer == 3 || sv_gametype->integer == 4 || sv_gametype->integer == 5 || sv_gametype->integer == 6 || sv_gametype->integer == 7 || sv_gametype->integer == 8) {
+    
+        if (!Q_stricmp(pb_enablebots->string, "off") && !Q_stricmp(pb_autobots->string, "on")) {
+        
+            int ic;
+            int cc = 0;
+            int cs = 0;
+            client_t *clc;
+            playerState_t *psc;
+            int teamc;
+        
+            for (ic = 0, clc = svs.clients; ic < sv_maxclients->integer; ic++, clc++) {
+        
+                if (!clc->state) {
+                    continue;
+                }
+        
+                psc = SV_GameClientNum( ic );
+                teamc = psc->persistant[PERS_TEAM];
+
+                if (teamc == 1 || teamc == 2) {
+                    cc++;
+                }
+                if (teamc == 3) {
+                    cs++;
+                }
+            
+            }
+        
+            if (cc == 0){
+            
+                char cmdcc[64];
+                char cmdccb[64];
+                Com_sprintf(cmdcc, sizeof(cmdcc), "pb_enablebots on\n");
+                Cmd_ExecuteString(cmdcc);
+                Com_sprintf(cmdccb, sizeof(cmdccb), "bot_minplayers %s\n",pb_botminplayers->string);
+                Cmd_ExecuteString(cmdccb);
+            
+                if (cs == 0){
+                    
+                    char cmdccc[64];
+                    Com_sprintf(cmdccc, sizeof(cmdccc), "map ut4_turnpike\n");
+                    Cmd_ExecuteString(cmdccc);
+                
+                }
+            
+            }
+
+        }
+    
+        if (!Q_stricmp(pb_enablebots->string, "on") && !Q_stricmp(pb_autobots->string, "on")) {
+        
+        int icc;
+        int ccc = 0;
+
+        client_t *clcc;
+
+            for (icc = 0, clcc = svs.clients; icc < sv_maxclients->integer; icc++, clcc++) {
+        
+                if (!clcc->state) {
+                    continue;
+                }
+
+                ccc++;
+            
+            }
+
+                if (ccc == 0 && sv.time > 120000){
+                    char cmdcccc[64];
+                    Com_sprintf(cmdcccc, sizeof(cmdcccc), "map %s\n", pb_botsmapdefault->string);
+                    Cmd_ExecuteString(cmdcccc);
+                }
+        
+        }
+    
+        if (!Q_stricmp(pb_enablebots->string, "on")  && sv.time >= 60000) {
+        
+            int ib;
+            int bc = 0;
+            client_t *clb;
+
+            for (ib = 0, clb = svs.clients; ib < sv_maxclients->integer; ib++, clb++) {
+        
+                if (!clb->state) {
+                    continue;
+                }
+                if (clb->netchan.remoteAddress.type == NA_BOT) {
+                 bc++;
+                }
+            
+            }
+            
+            char cmd4[64];
+            char cmd5[64];
+
+            if (bc == 0){
+                if (!Q_stricmp(Cvar_VariableString( "g_mapcycle" ), pb_mapcyclebots->string)) {
+                    Com_sprintf(cmd4, sizeof(cmd4), "g_mapcycle %s\n", pb_mapcycle->string);
+                    Cmd_ExecuteString(cmd4);
+                }                
+            }
+            else {
+                if (!Q_stricmp(Cvar_VariableString( "g_mapcycle" ), pb_mapcycle->string)) {
+                    Com_sprintf(cmd5, sizeof(cmd5), "g_mapcycle %s\n", pb_mapcyclebots->string);
+                    Cmd_ExecuteString(cmd5); 
+                }
+            }
+
+        }
+    
+    }
+}
+/*
+=======================
 PB_GameControl
 =======================
 */
@@ -695,7 +955,9 @@ void PB_GameControl( void ) {
             PB_Pub();
         }
     }
-
+    
+    PB_CheckMapBots();
+    PB_CheckPlayers();
 }
 /*
 ===============================================================================================================================================================

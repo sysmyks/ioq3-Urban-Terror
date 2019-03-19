@@ -78,6 +78,14 @@ cvar_t   *pb_timepub;
 cvar_t   *pb_positionpub;
 cvar_t   *pb_knifefullstamina;
 cvar_t   *pb_snipeteam;
+
+cvar_t   *pb_mapslistbots;
+cvar_t   *pb_mapcyclebots;
+cvar_t   *pb_mapcycle;
+cvar_t   *pb_botsmapdefault;
+cvar_t   *pb_enablebots;
+cvar_t   *pb_botminplayers;
+cvar_t   *pb_autobots;
 /*
 ===================================================================
 */

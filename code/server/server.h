@@ -339,6 +339,14 @@ extern cvar_t *pb_timepub;
 extern cvar_t *pb_positionpub;
 extern cvar_t *pb_knifefullstamina;
 extern cvar_t *pb_snipeteam;
+
+extern	cvar_t *pb_mapslistbots;
+extern	cvar_t *pb_mapcyclebots;
+extern	cvar_t *pb_mapcycle;
+extern	cvar_t *pb_botsmapdefault;
+extern	cvar_t *pb_enablebots;
+extern	cvar_t *pb_botminplayers;
+extern	cvar_t *pb_autobots;
 /*
 ===================================================================
 */
@@ -359,7 +367,15 @@ void SV_RemoveOperatorCommands (void);
 
 void SV_MasterHeartbeat (void);
 void SV_MasterShutdown (void);
-
+/*
+===================================================================
+PB
+===================================================================
+*/
+int PB_TestMapBots(char *map);
+/*
+===================================================================
+*/
 //
 // sv_init.c
 //
