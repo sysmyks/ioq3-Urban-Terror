@@ -765,8 +765,8 @@ void PB_CheckMapBots( void ) {
     }
     else {testmap = 0;}
 
-    if (sv_gametype->integer == 0 || sv_gametype->integer == 1 || sv_gametype->integer == 9 || sv_gametype->integer == 10 || sv_gametype->integer == 11) {
-        
+    //if (sv_gametype->integer == 0 || sv_gametype->integer == 1 || sv_gametype->integer == 9 || sv_gametype->integer == 10 || sv_gametype->integer == 11) {
+    if (sv_gametype->integer == 9) {      
         if (botminplayers != 0) {       
             Com_sprintf(cmd, sizeof(cmd), "bot_minplayers 0\n");
             Cmd_ExecuteString(cmd);
