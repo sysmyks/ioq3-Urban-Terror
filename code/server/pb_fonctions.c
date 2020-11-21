@@ -831,7 +831,8 @@ PB PB_CheckPlayers
 */
 void PB_CheckPlayers( void ) {
     
-    if (sv_gametype->integer == 3 || sv_gametype->integer == 4 || sv_gametype->integer == 5 || sv_gametype->integer == 6 || sv_gametype->integer == 7 || sv_gametype->integer == 8) {
+    //if (sv_gametype->integer == 3 || sv_gametype->integer == 4 || sv_gametype->integer == 5 || sv_gametype->integer == 6 || sv_gametype->integer == 7 || sv_gametype->integer == 8) {    
+    if (sv_gametype->integer != 9) {
     
         if (!Q_stricmp(pb_enablebots->string, "off") && !Q_stricmp(pb_autobots->string, "on")) {
         
