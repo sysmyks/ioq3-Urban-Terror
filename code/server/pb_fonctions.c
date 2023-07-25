@@ -9,6 +9,9 @@ Author      : PtitBigorneau
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
+#define BUFFER 300
+
+
 /*
 ===============================================================================
 */
@@ -1234,4 +1237,120 @@ void PB_Events(char event[1024])
             }
         }
     }
+}
+
+void SV_saveJumpPos(client_t *client, char *mapName, char *jumpName) {
+	int cid;
+	playerState_t *ps;
+	cid = (int) (client -svs.clients);
+	ps = SV_GameClientNum(cid);
+	
+	FILE *output;
+	char buffer[BUFFER];
+	char command[BUFFER];
+
+	vec3_t position;
+	vec3_t angle;
+	VectorCopy(ps->origin, position);
+	VectorCopy(ps->viewangles,angle);
+
+	//SV_SendServerCommand(client, "print \"%s | Save position of jump : %s (%f, %f, %f)\"", mapName, jumpName, position[0], position[1], position[2]);
+	sprintf(command, "python3 save.py %s %s %f %f %f %f %f %f", mapName, jumpName, 
+		position[0], position[1], position[2],
+		angle[0], angle[1], angle[2]);
+
+	output = popen(command, "r");
+
+	if (fgets(buffer, BUFFER-1, output)!=NULL) {
+   		if (buffer[0] == 'N' && buffer[1] == 'C') {
+			SV_SendServerCommand(client, "print \"Please specify a jump name to save location\"");
+			return;
+		} else {
+			SV_SendServerCommand(client, "print \"%s\"", buffer);
+			return;
+		}
+	} // TODO REFACTO
+
+	pclose(output);
+
+	
+}
+
+void SV_loadJumpPos(client_t *client, char *mapName, char *jumpName) {
+	FILE *output;
+	char buffer[BUFFER];
+	char command[BUFFER];
+
+	vec3_t coordonnees;
+	vec3_t angle;
+
+	sprintf(command, "python3 load.py %s %s", mapName, jumpName);
+
+	output = popen(command, "r");
+
+	while (fgets(buffer, BUFFER-1, output)!=NULL) {
+		if (buffer[0] == '(') {
+			convertStringIntoCoord(buffer, coordonnees, angle);
+			SV_teleportToPos_f(client, coordonnees, angle);
+		} else {
+			//SV_SendServerCommand(client, "print \"%s\"", buffer);
+			SV_SendServerCommand(client, "chat \"%s\"", buffer);
+		}
+	}
+
+	pclose(output);
+}
+
+void convertStringIntoCoord(char *chaine, vec3_t coordonnees, vec3_t angle) {
+	chaine++;
+	int i = 0;
+	char delim[] = ",";
+	char *c = strtok(chaine, delim);
+	
+	while(c != NULL) {
+        if (i == 6) {
+            return;
+        } else {
+            if ( i <= 2) {
+				coordonnees[i] = atof(c);
+			} else {
+				angle[i%3] = atof(c);
+            }
+			i++;
+			c = strtok(NULL, delim);
+        }
+	}
+}
+
+void SV_teleportToPos_f(client_t *client, vec3_t coordonnees, vec3_t angle_v) {
+	int cid, i, angle;
+	playerState_t *ps;
+	sharedEntity_t *ent;
+
+	// get the client slot
+	cid = (int) (client -svs.clients);
+
+	ent = SV_GentityNum(cid);
+	ps = SV_GameClientNum(cid);
+
+	// clear client velocity
+	VectorClear(ps->velocity);
+	// regenerate stamina
+	ps->stats[0] = 30000;
+
+	VectorCopy(coordonnees, ps->origin);
+
+	// set the view angle
+	for (i = 0; i < 3; i++) {
+		if (i == 0) {
+			angle = ANGLE2SHORT(angle_v[i] - 11);
+		} else {
+			angle = ANGLE2SHORT(angle_v[i]);
+		}
+		ps->delta_angles[i] = angle - client->lastUsercmd.angles[i];
+	}
+
+	// Set the view angle
+	VectorCopy(angle_v, ent->s.angles);
+	VectorCopy(angle_v, ps->viewangles);
 }
