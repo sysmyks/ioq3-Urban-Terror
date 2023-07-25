@@ -1824,6 +1824,74 @@ static void SV_CompleteMapName( char *args, int argNum ) {
     }
 }*/
 
+/////////////////////////////////////////////////////////////////////
+// Name        : SV_Spoof_f
+// Description : Send a game client command as a specific client
+// Author      : Fenix
+/////////////////////////////////////////////////////////////////////
+static void SV_Spoof_f(void) {
+    
+    char      *cmd;
+    client_t  *cl;
+    
+    // make sure server is running
+    if (!com_sv_running->integer) {
+        Com_Printf("Server is not running\n");
+        return;
+    }
+    
+    // check for correct parameters
+    if (Cmd_Argc() < 3 || !strlen(Cmd_Argv(2))) {
+        Com_Printf("Usage: spoof <client> <command>\n");
+        return;
+    }
+    
+    // search the client
+    cl = SV_GetPlayerByHandle();
+    if (!cl) {
+        return;
+    }
+    
+    // get the command
+    cmd = Cmd_ArgsFromRaw(2);
+    Cmd_TokenizeString(cmd);
+   
+	
+    // send the command
+    VM_Call(gvm, GAME_CLIENT_COMMAND, cl - svs.clients);
+
+}
+
+static void SV_loadJumpPosServ_f( void ) {
+
+	client_t *cl;
+	
+	if ( !com_sv_running->integer ) {
+		Com_Printf( "Server is not running.\n" );
+		return;
+	}
+
+	cl = SV_GetPlayerByHandle();
+	char *mapName = Cvar_VariableString("mapname");
+
+	SV_loadJumpPos(cl, mapName, Cmd_Argv(2));
+}
+
+static void SV_saveJumpPosServ_f( void ) {
+
+	client_t *cl;
+	
+	if ( !com_sv_running->integer ) {
+		Com_Printf( "Server is not running.\n" );
+		return;
+	}
+
+	cl = SV_GetPlayerByHandle();
+	char *mapName = Cvar_VariableString("mapname");
+
+	SV_saveJumpPos(cl, mapName, Cmd_Argv(2));
+}
+
 /*
 ==================
 SV_AddOperatorCommands
@@ -1860,7 +1928,8 @@ void SV_AddOperatorCommands( void ) {
     if( com_dedicated->integer ) {
         Cmd_AddCommand ("say", SV_ConSay_f);
         Cmd_AddCommand ("tell", SV_ConTell_f);
-        Cmd_AddCommand("startserverdemo", SV_StartServerDemo_f);
+        Cmd_AddCommand("spoof", SV_Spoof_f);
+		Cmd_AddCommand("startserverdemo", SV_StartServerDemo_f);
         Cmd_AddCommand("stopserverdemo", SV_StopServerDemo_f);
     }
 /*
@@ -1872,7 +1941,8 @@ PB
     Cmd_AddCommand ("forcebots", PB_ForceBots_f);
     Cmd_AddCommand ("teams", PB_BalanceTeams_f);
     Cmd_AddCommand ("givetod50", PB_GiveTod50_f);
-
+	Cmd_AddCommand("saveJumpPos", SV_saveJumpPosServ_f);
+	Cmd_AddCommand("loadJumpPos", SV_loadJumpPosServ_f);
     Cmd_AddCommand ("kickbots", PB_KickBots_f);
     Cmd_AddCommand ("addbots", PB_AddBots_f);
 /*
