@@ -1,0 +1,12 @@
+This work requires a specific map depot. 
+It won't work with urt.li; 
+you need to replace the 'q3ut4' folder with 'download.' 
+For example: <url>/download/map.pk3. 
+The compilation doesn't work on Windows.
+Also, if you encounter any problems with your bot-rcon, 
+try running it with this command: 
+
++set fs_game q3ut4 +set dedicated 2 +set net_port 27960 +set com_hunkmegs 128 +exec server.cfg
+
+You will find the games.log file in the user's directory, 
+for example: ~/.q3a/q3ut4/games.log.
