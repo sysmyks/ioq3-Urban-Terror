@@ -1,0 +1,5 @@
+This work requires a specific map depot. 
+It won't work with urt.li; 
+you need to replace the 'q3ut4' folder with 'download.' 
+For example: <url>/download/map.pk3. 
+The compilation doesn't work on Windows
